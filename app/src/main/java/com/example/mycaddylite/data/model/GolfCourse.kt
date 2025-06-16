@@ -1,4 +1,4 @@
-package com.example.mycaddylite.data
+package com.example.mycaddylite.data.model
 
 import com.google.gson.annotations.SerializedName
 
@@ -11,5 +11,6 @@ data class GolfCourseResponse(
 data class GolfCourse(
     @SerializedName("club_name") val courseName: String,
     @SerializedName("latitude") val latitude: String,
-    @SerializedName("longitude") val longitude: String
+    @SerializedName("longitude") val longitude: String,
+    @SerializedName("club_id") val clubId: String
 )

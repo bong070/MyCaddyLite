@@ -1,14 +1,13 @@
-package com.example.mycaddylite.presentation
+package com.example.mycaddylite.viewmodel
 
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.mycaddylite.data.GolfCourse
-import com.example.mycaddylite.data.GolfCourseRepository
+import com.example.mycaddylite.data.repository.GolfCourseRepository
+import com.example.mycaddylite.data.model.GolfCourse
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
-import retrofit2.Response
 
 class GolfCourseViewModel(
     private val repository: GolfCourseRepository = GolfCourseRepository()

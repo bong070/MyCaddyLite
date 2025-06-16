@@ -1,4 +1,7 @@
-package com.example.mycaddylite.data
+package com.example.mycaddylite.data.repository
+
+import com.example.mycaddylite.data.model.GolfCourse
+import com.example.mycaddylite.data.network.RetrofitInstance
 
 class GolfCourseRepository {
     private val service = RetrofitInstance.api

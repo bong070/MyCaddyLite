@@ -15,9 +15,13 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.ui.Modifier
+import androidx.navigation.NavType
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import android.util.Log
+import com.example.mycaddylite.viewmodel.GolfCourseViewModel
 
 class MainActivity : ComponentActivity() {
 
@@ -31,7 +35,9 @@ class MainActivity : ComponentActivity() {
                 val error by viewModel.error.collectAsState()
 
                 val context = LocalContext.current
+                val navController = rememberNavController()
 
+                // 위치 가져오기
                 LaunchedEffect(Unit) {
                     val fusedLocationClient = LocationServices.getFusedLocationProviderClient(context)
                     if (ActivityCompat.checkSelfPermission(
@@ -39,7 +45,6 @@ class MainActivity : ComponentActivity() {
                             Manifest.permission.ACCESS_FINE_LOCATION
                         ) == PackageManager.PERMISSION_GRANTED
                     ) {
-                        // getCurrentLocation 사용
                         fusedLocationClient.getCurrentLocation(Priority.PRIORITY_HIGH_ACCURACY, null)
                             .addOnSuccessListener { location: Location? ->
                                 if (location != null) {
@@ -57,7 +62,25 @@ class MainActivity : ComponentActivity() {
                     }
                 }
 
-                CourseListScreen(courseList, error)
+                // 네비게이션 설정
+                NavHost(navController = navController, startDestination = "list") {
+                    composable("list") {
+                        CourseListScreen(
+                            courses = courseList,
+                            error = error,
+                            onCourseSelected = { courseId ->
+                                navController.navigate("detail/$courseId")
+                            }
+                        )
+                    }
+                    composable(
+                        "detail/{courseId}",
+                        arguments = listOf(navArgument("courseId") { type = NavType.StringType })
+                    ) { backStackEntry ->
+                        val courseId = backStackEntry.arguments?.getString("courseId") ?: ""
+                        CourseDetailScreen(courseId)
+                    }
+                }
             }
         }
     }

@@ -1,6 +1,6 @@
-package com.example.mycaddylite.data
+package com.example.mycaddylite.data.network
 
-import com.example.mycaddylite.data.GolfCourseResponse
+import com.example.mycaddylite.data.model.GolfCourse
 import retrofit2.Response
 import retrofit2.http.GET
 import retrofit2.http.Query

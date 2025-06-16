@@ -1,8 +1,8 @@
-package com.example.mycaddylite.data
+package com.example.mycaddylite.data.network
 
+import com.example.mycaddylite.BuildConfig
 import okhttp3.Interceptor
 import okhttp3.Response
-import com.example.mycaddylite.BuildConfig
 
 class ApiKeyInterceptor : Interceptor {
     override fun intercept(chain: Interceptor.Chain): Response {
