@@ -4,92 +4,61 @@ import android.Manifest
 import android.content.pm.PackageManager
 import android.location.Location
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.runtime.*
-import androidx.compose.ui.Modifier
 import androidx.core.app.ActivityCompat
-import com.google.android.gms.location.FusedLocationProviderClient
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.mycaddylite.ui.theme.MyCaddyLiteTheme
 import com.google.android.gms.location.LocationServices
-import com.google.maps.android.compose.*
-import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.location.Priority
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.foundation.layout.fillMaxSize
-import com.google.android.gms.maps.model.CameraPosition
-
-
+import androidx.compose.ui.Modifier
+import android.util.Log
 
 class MainActivity : ComponentActivity() {
-
-    private lateinit var fusedLocationClient: FusedLocationProviderClient
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
-
-        val locationState = mutableStateOf<LatLng?>(null)
-
-        val permissionLauncher = registerForActivityResult(
-            ActivityResultContracts.RequestMultiplePermissions()
-        ) { permissions ->
-            if (permissions[Manifest.permission.ACCESS_FINE_LOCATION] == true) {
-                fetchLastLocation { latLng ->
-                    locationState.value = latLng
-                }
-            }
-        }
-
-        permissionLauncher.launch(
-            arrayOf(
-                Manifest.permission.ACCESS_FINE_LOCATION,
-                Manifest.permission.ACCESS_COARSE_LOCATION
-            )
-        )
-
         setContent {
-            locationState.value?.let { userLocation ->
-                GolfMap(userLocation)
+            MyCaddyLiteTheme {
+                val viewModel: GolfCourseViewModel = viewModel()
+                val courseList by viewModel.courses.collectAsState()
+                val error by viewModel.error.collectAsState()
+
+                val context = LocalContext.current
+
+                LaunchedEffect(Unit) {
+                    val fusedLocationClient = LocationServices.getFusedLocationProviderClient(context)
+                    if (ActivityCompat.checkSelfPermission(
+                            context,
+                            Manifest.permission.ACCESS_FINE_LOCATION
+                        ) == PackageManager.PERMISSION_GRANTED
+                    ) {
+                        // getCurrentLocation 사용
+                        fusedLocationClient.getCurrentLocation(Priority.PRIORITY_HIGH_ACCURACY, null)
+                            .addOnSuccessListener { location: Location? ->
+                                if (location != null) {
+                                    Log.d("MainActivity", "위도 경도: ${location.latitude}, ${location.longitude}")
+                                    viewModel.loadCourses(
+                                        location.latitude.toString(),
+                                        location.longitude.toString()
+                                    )
+                                } else {
+                                    Log.d("MainActivity", "현재 위치를 가져오지 못함 (getCurrentLocation)")
+                                }
+                            }
+                    } else {
+                        Log.e("MainActivity", "위치 권한이 없습니다.")
+                    }
+                }
+
+                CourseListScreen(courseList, error)
             }
         }
-    }
-
-    private fun fetchLastLocation(callback: (LatLng) -> Unit) {
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
-            != PackageManager.PERMISSION_GRANTED
-        ) return
-
-        fusedLocationClient.lastLocation
-            .addOnSuccessListener { location: Location? ->
-                location?.let {
-                    callback(LatLng(it.latitude, it.longitude))
-                } ?: Log.e("MyCaddy", "❌ 위치를 가져올 수 없습니다.")
-            }
-    }
-}
-
-@Composable
-fun GolfMap(userLocation: LatLng) {
-    val cameraPositionState = rememberCameraPositionState {
-        position = CameraPosition.fromLatLngZoom(userLocation, 17f)
-    }
-
-    GoogleMap(
-        modifier = Modifier.fillMaxSize(),
-        cameraPositionState = cameraPositionState,
-        properties = MapProperties(isMyLocationEnabled = true)
-    ) {
-        Marker(
-            state = MarkerState(position = userLocation),
-            title = "현재 위치"
-        )
-
-        // 예시 홀 위치
-        val holeLatLng = LatLng(37.4241, -122.0839)
-        Marker(
-            state = MarkerState(position = holeLatLng),
-            title = "1번 홀"
-        )
     }
 }

@@ -4,6 +4,8 @@
     <!-- 위치 권한 -->
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.INTERNET"/>
+
 
     <!-- Wear OS 앱임을 명시 -->
     <uses-feature android:name="android.hardware.type.watch" />
@@ -27,11 +29,11 @@
         <!-- 지도 API 키 -->
         <meta-data
             android:name="com.google.android.geo.API_KEY"
-            android:value="AIzaSyCDnhB7PEy1HOO7X3DGV_CorHpax8ZAi-g" />
+            android:value="${GOOGLE_MAPS_API_KEY}" />
 
         <!-- 메인 액티비티 -->
         <activity
-            android:name=".presentation.MainActivity"
+            android:name="com.example.mycaddylite.presentation.MainActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>

@@ -1,5 +1,6 @@
 package com.example.mycaddylite.presentation
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.mycaddylite.data.GolfCourse
@@ -7,6 +8,7 @@ import com.example.mycaddylite.data.GolfCourseRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import retrofit2.Response
 
 class GolfCourseViewModel(
     private val repository: GolfCourseRepository = GolfCourseRepository()
@@ -26,6 +28,23 @@ class GolfCourseViewModel(
                 _error.value = null
             } catch (e: Exception) {
                 _error.value = e.message
+            }
+        }
+    }
+
+    fun loadCourses(lat: String, lng: String) {
+        Log.d("GolfCourseViewModel", "API 호출 시작")
+
+        viewModelScope.launch {
+            try {
+                val courseList = repository.getNearbyCourses(lat, lng)
+                Log.d("GolfCourseViewModel", "API 성공: ${courseList.size}개 수신됨")
+
+                _courses.value = courseList.take(5)
+                _error.value = null
+            } catch (e: Exception) {
+                Log.e("GolfCourseViewModel", "Exception: ${e.message}")
+                _error.value = "Network Error: ${e.message}"
             }
         }
     }
