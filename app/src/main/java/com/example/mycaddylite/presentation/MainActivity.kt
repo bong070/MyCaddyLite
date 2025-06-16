@@ -33,6 +33,7 @@ class MainActivity : ComponentActivity() {
                 val viewModel: GolfCourseViewModel = viewModel()
                 val courseList by viewModel.courses.collectAsState()
                 val error by viewModel.error.collectAsState()
+                val isLoading by viewModel.isLoading.collectAsState()
 
                 val context = LocalContext.current
                 val navController = rememberNavController()
@@ -65,13 +66,9 @@ class MainActivity : ComponentActivity() {
                 // 네비게이션 설정
                 NavHost(navController = navController, startDestination = "list") {
                     composable("list") {
-                        CourseListScreen(
-                            courses = courseList,
-                            error = error,
-                            onCourseSelected = { courseId ->
-                                navController.navigate("detail/$courseId")
-                            }
-                        )
+                        CourseListScreen(courseList, error, isLoading) { selectedCourse ->
+                            Log.d("MainActivity", "클릭된 골프장: ${selectedCourse.courseName}")
+                        }
                     }
                     composable(
                         "detail/{courseId}",
