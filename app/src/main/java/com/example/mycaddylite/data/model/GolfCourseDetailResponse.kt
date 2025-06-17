@@ -1,7 +1,7 @@
 package com.example.mycaddylite.data.model
 
 data class GolfCourseDetailResponse(
-    val id: String,
+    val id: Int,
     val name: String,
     val holes: List<Hole>
 )

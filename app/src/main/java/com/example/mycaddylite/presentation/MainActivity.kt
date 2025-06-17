@@ -20,7 +20,6 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import android.util.Log
 import com.example.mycaddylite.viewmodel.GolfCourseViewModel
 
 class MainActivity : ComponentActivity() {
@@ -38,7 +37,6 @@ class MainActivity : ComponentActivity() {
                 val context = LocalContext.current
                 val navController = rememberNavController()
 
-                // 위치 가져오기
                 LaunchedEffect(Unit) {
                     val fusedLocationClient = LocationServices.getFusedLocationProviderClient(context)
                     if (ActivityCompat.checkSelfPermission(
@@ -48,34 +46,34 @@ class MainActivity : ComponentActivity() {
                     ) {
                         fusedLocationClient.getCurrentLocation(Priority.PRIORITY_HIGH_ACCURACY, null)
                             .addOnSuccessListener { location: Location? ->
-                                if (location != null) {
-                                    Log.d("MainActivity", "위도 경도: ${location.latitude}, ${location.longitude}")
+                                location?.let {
                                     viewModel.loadCourses(
-                                        location.latitude.toString(),
-                                        location.longitude.toString()
+                                        it.latitude.toString(),
+                                        it.longitude.toString()
                                     )
-                                } else {
-                                    Log.d("MainActivity", "현재 위치를 가져오지 못함 (getCurrentLocation)")
                                 }
                             }
-                    } else {
-                        Log.e("MainActivity", "위치 권한이 없습니다.")
                     }
                 }
 
-                // 네비게이션 설정
                 NavHost(navController = navController, startDestination = "list") {
                     composable("list") {
                         CourseListScreen(courseList, error, isLoading) { selectedCourse ->
-                            Log.d("MainActivity", "클릭된 골프장: ${selectedCourse.courseName}")
+                            navController.navigate("distance/${selectedCourse.latitude}/${selectedCourse.longitude}/${selectedCourse.courseName}")
                         }
                     }
                     composable(
-                        "detail/{courseId}",
-                        arguments = listOf(navArgument("courseId") { type = NavType.StringType })
+                        "distance/{latitude}/{longitude}/{courseName}",
+                        arguments = listOf(
+                            navArgument("latitude") { type = NavType.StringType },
+                            navArgument("longitude") { type = NavType.StringType },
+                            navArgument("courseName") { type = NavType.StringType }
+                        )
                     ) { backStackEntry ->
-                        val courseId = backStackEntry.arguments?.getString("courseId") ?: ""
-                        CourseDetailScreen(courseId)
+                        val latitude = backStackEntry.arguments?.getString("latitude")?.toDouble() ?: 0.0
+                        val longitude = backStackEntry.arguments?.getString("longitude")?.toDouble() ?: 0.0
+                        val courseName = backStackEntry.arguments?.getString("courseName") ?: ""
+                        CourseDistanceScreen(latitude, longitude, courseName)
                     }
                 }
             }

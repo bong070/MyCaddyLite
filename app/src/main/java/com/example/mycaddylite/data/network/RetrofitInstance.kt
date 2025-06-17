@@ -1,7 +1,5 @@
 package com.example.mycaddylite.data.network
 
-import com.example.mycaddylite.data.network.ApiKeyInterceptor
-import com.example.mycaddylite.data.network.GolfCourseFinderService
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
